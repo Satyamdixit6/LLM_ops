@@ -1,0 +1,53 @@
+# llm_pipeline/configs/base_config.yaml
+# This is a conceptual configuration file.
+# In a real application, you'd use a library like Hydra or OmegaConf to load these.
+
+model:
+  name: "gpt2" # or distilgpt2, EleutherAI/gpt-neo-125M etc.
+  # For Flash Attention, specific compatible models are better
+  flash_attention_model_name: "EleutherAI/gpt-neo-125M" # Example
+
+data:
+  batch_size: 4
+  max_length: 128 # For training/fine-tuning
+  # For RAG, prompt max_length might be different or handled by tokenizer
+  rag_input_max_length: 400 # Max length for augmented prompt before generation
+
+training:
+  epochs: 1
+  learning_rate: 5e-5
+  warmup_steps_ratio: 0.1 # Ratio of total steps for warmup
+  # Pytorch Lightning Trainer args
+  accelerator: "auto"
+  devices: 1 # Or specific GPU IDs [0], or "auto" for PL to decide
+  precision: "32-true" # or "16-mixed", "bf16-mixed"
+
+lora:
+  r: 8
+  alpha: 16
+  dropout: 0.05
+  target_modules: ["c_attn"] # Example for GPT-2
+
+quantization:
+  type: "dynamic" # "dynamic" or "static"
+  # For static, calibration_data_samples: 100
+
+rag:
+  k_retrieval: 3
+  embedding_model: 'all-MiniLM-L6-v2'
+  # Sample documents would ideally be loaded from a file/source
+  sample_documents:
+    - "The Eiffel Tower is located in Paris, France and was completed in 1889."
+    - "PyTorch is an open-source machine learning library developed by Facebook's AI Research lab (FAIR)."
+    - "The capital of Japan is Tokyo, a bustling metropolis known for its blend of modern and traditional culture."
+    - "Large Language Models (LLMs) like GPT-3 are trained on vast amounts of text data."
+
+custom_cuda_kernel:
+  clamp_val: 5.0
+
+logging:
+  log_level: "INFO"
+  experiment_name: "llm_pipeline_run"
+
+# Output directory for models, logs, etc.
+output_dir: "./llm_pipeline_output"
